@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+	<property resource="application.properties" />
+	<include resource="org/springframework/boot/logging/logback/base.xml" />
+	<property name="log.location" value="/var/log/" />
+	<property name="LOGGING_FILE" value="sf-service" />
+	<property name="QUERY_LOGGING_FILE" value="query-sf-service" />
+	<property name="BUSINESS_LOGGING_FILE" value="bussiness-sf-service" />
+	<property name="LOG_PATTERN"
+		value="%d{yyyy-MM-dd HH:mm:ss.SSS} [trace=%mdc{X-B3-TraceId:-},span=%mdc{X-B3-SpanId:-}] [thread_name = %thread] %-5level [%logger{36}] -%msg%n" />
+
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>${LOG_PATTERN}</pattern>
+		</encoder>
+	</appender>
+
+	<appender name="BUSINESS_FILE"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${log.location}${BUSINESS_LOGGING_FILE}.log</file>
+		<encoder>
+			<pattern>${LOG_PATTERN}</pattern>
+		</encoder>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${log.location}${BUSINESS_LOGGING_FILE}_%d{yyyy-MM-dd}_%i.log
+			</fileNamePattern>
+			<timeBasedFileNamingAndTriggeringPolicy
+				class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+				<maxFileSize>50MB</maxFileSize>
+			</timeBasedFileNamingAndTriggeringPolicy>
+			<maxHistory>7</maxHistory>
+		</rollingPolicy>
+	</appender>
+
+	<appender name="FILE"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${log.location}${LOGGING_FILE}.log</file>
+		<encoder>
+			<pattern>${LOG_PATTERN}</pattern>
+		</encoder>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${log.location}${LOGGING_FILE}_%d{yyyy-MM-dd}_%i.log
+			</fileNamePattern>
+			<timeBasedFileNamingAndTriggeringPolicy
+				class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+				<maxFileSize>50MB</maxFileSize>
+			</timeBasedFileNamingAndTriggeringPolicy>
+			<maxHistory>7</maxHistory>
+		</rollingPolicy>
+	</appender>
+
+	<!-- All the logs will be absorbed by FILE appeneder -->
+	<logger name="com.sf" level="DEBUG" additivity="false">
+		<appender-ref ref="FILE" />
+	</logger>
+
+	<appender name="QUERY_FILE"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${log.location}${QUERY_LOGGING_FILE}.log</file>
+		<encoder>
+			<pattern>${LOG_PATTERN}</pattern>
+		</encoder>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${log.location}${QUERY_LOGGING_FILE}_%d{yyyy-MM-dd}_%i.log
+			</fileNamePattern>
+			<timeBasedFileNamingAndTriggeringPolicy
+				class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+				<maxFileSize>50MB</maxFileSize>
+			</timeBasedFileNamingAndTriggeringPolicy>
+			<maxHistory>7</maxHistory>
+		</rollingPolicy>
+	</appender>
+
+	<logger name="org.hibernate.SQL" additivity="false">
+		<level value="DEBUG" />
+		<appender-ref ref="QUERY_FILE" />
+	</logger>
+
+	<logger name="org.hibernate.type" additivity="false">
+		<level value="TRACE" />
+		<appender-ref ref="QUERY_FILE" />
+	</logger>
+
+	<!-- All the mysql logs will be absorbed by QUERY FILE appeneder -->
+	<logger name="MySQL" level="INFO" additivity="false">
+		<appender-ref ref="QUERY_FILE" />
+	</logger>
+</configuration>
